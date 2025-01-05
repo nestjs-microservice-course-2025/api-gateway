@@ -12,6 +12,8 @@ import { firstValueFrom } from 'rxjs';
 import { NATS_SERVICE } from 'src/config';
 import { LoginUserDto, RegisterUserDto } from './dto';
 import { AuthGuard } from './guard/auth.guard';
+import { Token, User } from './decorators';
+import { CurrentUser } from './interfaces/current-user.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -43,9 +45,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get('verify')
-  async verifyToken(@Request() req) {
-    const user = req['user'];
-    const token = req['token'];
+  async verifyToken(@User() user: CurrentUser, @Token() token: string) {
     return { user, token };
     // try {
     //   const tokenVerification = await firstValueFrom(
