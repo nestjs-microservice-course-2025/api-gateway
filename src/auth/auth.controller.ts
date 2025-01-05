@@ -47,13 +47,5 @@ export class AuthController {
   @Get('verify')
   async verifyToken(@User() user: CurrentUser, @Token() token: string) {
     return { user, token };
-    // try {
-    //   const tokenVerification = await firstValueFrom(
-    //     this.natsClient.send('auth.verify.token', {}),
-    //   );
-    //   return tokenVerification;
-    // } catch (error) {
-    //   throw new RpcException(error);
-    // }
   }
 }
