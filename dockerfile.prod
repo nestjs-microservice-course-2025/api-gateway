@@ -46,9 +46,3 @@ USER appuser
 EXPOSE 3000
 
 CMD [ "node", "dist/main.js" ]
-
-
-
-# para construir imagen docker (buscar dentro de docker desktop/images)
-# luego establecer el nombre del contenedor, puerto 3000, NATS_SERVERS: nats://nats:4222
-# docker build -f dockerfile.prod -t client-gateway .
