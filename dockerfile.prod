@@ -1,4 +1,5 @@
-FROM node:21-alpine3.19
+# Dependencias
+FROM node:21-alpine3.19 as deps
 
 WORKDIR /usr/src/app
 
@@ -6,13 +7,47 @@ COPY package*.json ./
 
 RUN npm install
 
+
+# Builder - Construye la aplicación
+FROM node:21-alpine3.19 as builder
+
+WORKDIR /usr/src/app
+
+# Copiar de deps, los modulos de node que se instalaron en el paso anterior
+
+COPY --from=deps /usr/src/app/node_modules ./node_modules
+
+# Copiar todo el codigo fuente de la aplicación
 COPY . .
 
+# RUN npm run test
 RUN npm run build
+
+# Solo dejar las dependencias de producción, todo lo demás se elimina
+RUN npm ci -f --only=production && npm cache clean --force
+
+# Crear la imagen de Docker
+FROM node:21-alpine3.19 as prod
+
+WORKDIR /usr/src/app
+
+# Copiar de builder, los modulos de node que se instalaron y limpiaron en el paso anterior
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+
+# Copiar la carpeta de DIST
+COPY --from=builder /usr/src/app/dist ./dist
+
+ENV NODE_ENV=production
+
+# El usuario por defecto tiene privilegios demasiado altos, puede borrar directorios, etc.
+RUN adduser --disabled-password --gecos "" appuser
+USER appuser
 
 EXPOSE 3000
 
 CMD [ "node", "dist/main.js" ]
+
+
 
 # para construir imagen docker (buscar dentro de docker desktop/images)
 # luego establecer el nombre del contenedor, puerto 3000, NATS_SERVERS: nats://nats:4222
